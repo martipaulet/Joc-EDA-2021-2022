@@ -20,7 +20,8 @@ struct PLAYER_NAME : public Player {
 
   /**
    * Types and attributes for your player can be defined here.
-   */
+   */ 
+  
 
   /**
    * Play method, invoked once per each round.
