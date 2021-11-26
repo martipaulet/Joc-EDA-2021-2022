@@ -32,11 +32,24 @@ struct PLAYER_NAME : public Player {
 
   vector<int> units; 
 
-
   Grid table(const int rows(), VC(cols()));  //Matrix of the game_map
+
   /**
    * Methods.
    */ 
+
+  //Do if round() == 0:
+  //Initialize pos_units, pos_cities, pos_paths
+  void initialize_all() {
+    units = my_units(me());
+    int n_units = units.size();
+    for (int i = 0; i < n_units; ++i) {
+      int id = units[i];
+      Unit u = unit(id);
+      Pos aux = u.pos;
+      pos_units.insert(make_pair(id,aux));
+    }
+  }
 
   //a-b distance (ignoring obstacles(walls,players,virus))
   int dist(const Pos &a, const Pos &b) {  
