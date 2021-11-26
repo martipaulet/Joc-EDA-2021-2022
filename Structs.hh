@@ -110,7 +110,6 @@ enum CellType {
  * Describes a cell in the board, and its contents.
  */
 struct Cell {
-
   CellType type; // The type of cell.
   int   unit_id; // The id of the unit on the cell if any, -1 otherwise.
   int   city_id; // If type == CITY, the id of the city, -1 otherwise.
