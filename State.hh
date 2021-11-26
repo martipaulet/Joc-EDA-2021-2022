@@ -66,7 +66,7 @@ public:
    * Cities are identified with natural numbers from 0 to nb_cities() - 1.
    */
   City city(int id) const;
-
+  
   /**
    * Returns the identifier of the player who last conquered the city
    * with identifier id, -1 if the city has never been conquered.

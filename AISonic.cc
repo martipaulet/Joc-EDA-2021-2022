@@ -22,17 +22,17 @@ struct PLAYER_NAME : public Player {
    * Types and attributes for your player can be defined here.
    */ 
 
-  typedef vector<Cell> VC;
-  typedef vector<VC> Grid;
+  
 
   
   map<int, City> pos_cities;    //id_city -> vector<Pos> of the City
   map<int, Path> pos_paths;     //id path -> pair<pair<int,int>, vector<Pos>> where: <<id of org city, id of dest city>, vector<Pos> of the Path> 
-  map<int, Pos> pos_units;      //id_unit -> pos of the unit     
+  set<Pos> pos_walls; 
+  map<int, Pos> pos_units;      //id_unit -> pos of the unit    
 
   vector<int> units; 
 
-  Grid table(const int rows(), VC(cols()));  //Matrix of the game_map
+
 
   /**
    * Methods.
@@ -49,7 +49,28 @@ struct PLAYER_NAME : public Player {
       Pos aux = u.pos;
       pos_units.insert(make_pair(id,aux));
     }
+
+    for (int i = 0; i < rows(); ++i) {
+      for (int j = 0; j < cols(); ++j) {
+        Cell aux = cell(i,j);
+        if (aux.city_id != -1) {
+          City c = city(aux.city_id);
+          pos_cities.insert(make_pair(aux.city_id,c));
+        }
+        else if (aux.path_id != -1) {
+          Path p = path(aux.path_id);
+          pos_paths.insert(make_pair(aux.path_id,p));
+        }
+        else if (aux.type == WALL) {
+          Pos paux; paux.i = i; paux.j = j;
+          pos_walls.insert(paux);
+        }
+      }
+    }
   }
+
+
+
 
   //a-b distance (ignoring obstacles(walls,players,virus))
   int dist(const Pos &a, const Pos &b) {  
