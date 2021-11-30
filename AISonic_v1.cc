@@ -162,7 +162,7 @@ struct PLAYER_NAME : public Player {
       for (int i = 0; i < n_units; ++i) {
         /*if (i == 0)*/ bfs_units(units_id[i]);
       }
-   // }
+    //}
   }
 };
 
