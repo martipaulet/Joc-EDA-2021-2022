@@ -5,7 +5,7 @@
  * Write the name of your player and save this file
  * with the same name and .cc extension.
  */
-#define PLAYER_NAME Sonic
+#define PLAYER_NAME Sonic_v1
 
 
 struct PLAYER_NAME : public Player {
@@ -29,84 +29,77 @@ struct PLAYER_NAME : public Player {
   typedef vector<VB> VVB;     //matriz booleanos
 
 
-  
-
   /**
    * Methods.
    */ 
 
-  //returns an integer matrix of the board with -1 on the walss position
-  VVI create_table() {
-    VVI v(rows(),VI(cols(),-2));
-    for(int i = 0; i < rows(); ++i) {
-      for(int j = 0; j < cols(); ++j){
-          Cell c = cell(i,j);
-          if (c.type == WALL) v[i][j] = -1;
-      }
-    }
-    return v;
+
+  //moves the unit with identifier id to pos dest at distance d 
+  void move_unit (int id, VVI &VP, int d, Pos &dest) {
+    Dir next_move = NONE;
+    int aux = d;
+    for (int i = 0; i <= aux; ++i) {
+      next_move = find_next_move(dest,d,VP);
+      --d;
+    }     
+    move(id,next_move);                    
   }
 
 
+  //Returns the move to do from the position a to the original pos (going backwards) to know the movement the unit has to do  
   Dir find_next_move(Pos &a, int d, VVI &VP) {
-    if (pos_ok((a.i)-1,a.j) and VP[(a.i)-1][a.j] == d) {        //adalt
+    //CHECK TOP
+    if (pos_ok((a.i)-1,a.j) and VP[(a.i)-1][a.j] == d) {        
       a += TOP;
       return BOTTOM;
     }
-    else if (pos_ok((a.i)+1,a.j) and VP[(a.i)+1][a.j] == d) {   //abaix
+    //CHECK BOTTOM
+    else if (pos_ok((a.i)+1,a.j) and VP[(a.i)+1][a.j] == d) {   
       a += BOTTOM;
       return TOP;
     }
-    else if (pos_ok(a.i,(a.j)+1) and VP[a.i][(a.j)+1] == d) { //dreta
+    //CHECK RIGHT
+    else if (pos_ok(a.i,(a.j)+1) and VP[a.i][(a.j)+1] == d) {   
       a += RIGHT;
       return LEFT; 
     }
-    else if (pos_ok(a.i,(a.j)-1) and VP[a.i][(a.j)-1] == d) {   //esq
+    //CHECK LEFT
+    else if (pos_ok(a.i,(a.j)-1) and VP[a.i][(a.j)-1] == d) {  
       a += LEFT;
       return RIGHT;
     }
     return NONE;
   }
 
-  //bfs to a city: (APPROVED)
-  //returns the distance to the closest city (not conquered) or -1 otherwise
-  void bfs_units(int id) {                               
-    VVI VP = create_table();                                                    //board
-    queue <pair<pair<int, int>, int> > q;                                       //queue with pos(i,j) and distance d 
-    int movx[4] = {-1,1,0,0};                                                   //aux vectors
-    int movy[4] = {0,0,-1,1};
-    Unit u = unit(id);                                                
-    q.push(make_pair(make_pair(u.pos.i,u.pos.j),0)); 
-    int x,y,d;
-    bool f = true;
 
+  //bfs  (APPROVED)
+  void bfs_units(int id) {                               
+    VVI VP(rows(),VI(cols(),-1));                                               //BOARD
+    queue <pair<pair<int, int>, int> > q;                                       //QUEUE CONTAINING POSITIONS (i,j) AT DISTANCE D
+    int movx[4] = {-1,1,0,0};                                                   //CHECK SURROUNDING VECTORS
+    int movy[4] = {0,0,-1,1};
+    Unit u = unit(id);                                                          //ORIGINAL POS AT DISTANCE 0
+    q.push(make_pair(make_pair(u.pos.i,u.pos.j),0));                            
+    int x,y,d;
+  
     while(not q.empty()) {                         
-      x = q.front().first.first;                                                  //pos
+      x = q.front().first.first;                                                //CURRENT POSITION (on the bfs search)
       y = q.front().first.second;     
-      d = q.front().second;                                                       //distance
+      d = q.front().second;                                                     //DISTANCE TO THE UNIT POS
       q.pop();
 
-      if (VP[x][y] == -2) {
-        VP[x][y] = d;
+      if (VP[x][y] == -1) {                                                     //IF NOT VISITED
+        VP[x][y] = d;                                                           //MARK AS VISITED AT DISTANCE D OF THE UNIT POSITION
 
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < 4; ++i) {                                           //CHECK_SURROUNDINGS (top,bottom,left,right) (fer funcio int distance_to_a_path_or_city)
           Cell c = cell(x+movx[i],y+movy[i]);
-
           if (c.type != WALL) {
-            if (c.type == CITY or c.type == PATH) {
+            if (c.type == CITY or c.type == PATH) {                             //CITY OR PATH FOUND AT DISTANCE D+1
               int aux = c.city_id;
               int aux2 = c.path_id;
-
               if ((aux != -1 and city_owner(aux)!= me()) or (aux2 != -1 and path_owner(aux2) != me())) {
-                Pos dest; dest.i = x+movx[i]; dest.j = y+movy[i];                        //posicio final
-                Dir next_move = NONE;
-                int aux = d;
-                ++d;
-                for (int i = 0; i < d; ++i) {
-                  next_move = find_next_move(dest,aux,VP);
-                  --aux;
-                }     
-                move(id,next_move);                                                             
+                Pos dest;   dest.i = x+movx[i];   dest.j = y+movy[i];                        
+                move_unit (id, VP, d, dest);                                                           
                 return;
               }
             }
@@ -115,7 +108,7 @@ struct PLAYER_NAME : public Player {
         }
       }
     }
-    return;   //error return
+    return;                                                                      //error return
   }
 
 
@@ -123,13 +116,11 @@ struct PLAYER_NAME : public Player {
    * Play method, invoked once per each round.
    */
   virtual void play () {
-    if (round() == 199) {
       vector<int> units_id = my_units(me());
       int n_units = units_id.size();
       for (int i = 0; i < n_units; ++i) {
         bfs_units(units_id[i]);
       }
-    }
   }
 };
 

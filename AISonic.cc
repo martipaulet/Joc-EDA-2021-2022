@@ -121,10 +121,9 @@ struct PLAYER_NAME : public Player {
                 }*/
                 
                 int aux = d;
-                ++d;
                 //cerr << "(" << dest.i <<"," << dest.j << ") a distancia " << d <<  endl;
 
-                for (int i = 0; i < d; ++i) {
+                for (int i = 0; i <= d; ++i) {
                   //cerr << "steps remaining " << aux << endl;
                   next_move = find_next_move(dest,aux,VP);
                   //cerr << dest.i << " " << dest.j << endl;
